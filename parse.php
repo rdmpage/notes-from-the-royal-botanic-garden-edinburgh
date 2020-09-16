@@ -146,7 +146,7 @@ foreach($nodeCollection as $node)
     // In: Notes from the Royal Botanic Garden Edinburgh--1988 ;--v.45 (2) 327-335
     // In: Notes from the Royal Botanic Garden Edinburgh ; 1931 ; v.16 (n.79) 222
     
-    $pattern = '/(?<journal>Notes from the Royal Botanic Garden Edinburgh)[\s|;|-]+(?<year>[0-9]{4}(-[0-9]{4})?)[\s|;|-]+v.(?<volume>\d+)\s*\((?<issue>.*)\)\s+(?<spage>\d+)(-(?<epage>\d+))?/';
+    $pattern = '/(?<journal>Notes from the Royal Botanic Garden Edinburgh)[\s|;|-]+(?<year>[0-9]{4}(-[0-9]{4})?)[\s|;|-]+[v|V].\s*(?<volume>\d+)(\s*\((?<issue>.*)\))?\s+(?<spage>\d+)(-(?<epage>\d+))?/';
         
     
     foreach ($xpath->query ('marcentry', $node) as $n)
@@ -179,7 +179,9 @@ foreach($nodeCollection as $node)
     
     if (!isset($reference->journal))
     {
-    	echo "Bugger\n";
+		print_r($reference);    
+    
+    	echo "*** Bugger ***\n";
     	exit();
     }
     
