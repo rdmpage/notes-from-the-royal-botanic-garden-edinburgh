@@ -160,8 +160,11 @@ foreach($nodeCollection as $node)
     		$reference->issn 	= '0080-4274';
     		$reference->volume 	= $m['volume'];
     		$reference->issue 	= $m['issue'];
-    		$reference->issue = str_replace('n.', '', $reference->issue);
     		
+    		$reference->issue = str_replace('n.', '', $reference->issue);
+   			$reference->issue = str_replace('numbers ', '', $reference->issue);
+   			$reference->issue = str_replace('nos. ', '', $reference->issue);
+     		
     		
     		$reference->spage 	= $m['spage'];
     		
