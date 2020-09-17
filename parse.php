@@ -20,8 +20,8 @@ function reference_to_ris($reference)
 		'doi'		=> 'DO',
 		'notes'		=> 'N1',
 		'publisher'	=> 'PB',
-		'publoc'	=> 'PP',
-		);
+		'publoc'	=> 'PP'
+	);
 		
 	$ris = '';
 	
@@ -70,6 +70,17 @@ function reference_to_ris($reference)
 					}
 				}
 				break;
+				
+			case 'keywords':
+				foreach ($v as $a)
+				{
+					if ($a != '')
+					{
+						$ris .= "KW  - " . $a ."\n";
+					}
+				}
+				break;
+				
 				
 			case 'editors':
 				foreach ($v as $a)
@@ -129,21 +140,81 @@ foreach($nodeCollection as $node)
 
     $reference = new stdclass;
     
-    foreach ($xpath->query ('marcentry[@tag="260"]', $node) as $n)
+    $marc_author = 245;
+    $marc_title  = 260;
+    
+    // 100
+    foreach ($xpath->query ('marcentry[@tag="100"]', $node) as $n)
+    {
+    	$value_100 = trim($n->firstChild->nodeValue);
+    	
+    	if (preg_match('/^[A-Z]/', $value_100))
+    	{
+     		$marc_author = 100;
+    		$marc_title  = 245;
+    	}
+    }
+    
+    // 110
+    foreach ($xpath->query ('marcentry[@tag="110"]', $node) as $n)
+    {
+    	$value_110 = trim($n->firstChild->nodeValue);
+    	
+    	if (preg_match('/^[A-Z]/', $value_110))
+    	{
+     		$marc_author = 110;
+    		$marc_title  = 245;
+    	}
+    }    
+    
+    
+    // 260
+    // Normally this is the title
+    foreach ($xpath->query ('marcentry[@tag="' . $marc_title . '"]', $node) as $n)
     {
     	$reference->title = trim($n->firstChild->nodeValue);
     }
     
-    foreach ($xpath->query ('marcentry[@tag="245"]', $node) as $n)
+    // 245
+    // Normally this is an author
+    foreach ($xpath->query ('marcentry[@tag="' . $marc_author . '"]', $node) as $n)
     {
     	$author = trim($n->firstChild->nodeValue);
     	
-    	// clean extraneous metadata
-    	$author = preg_replace('/(\s+\([A-Z]\w+\))?\s+\d+-\d+$/', '', $author);
-    	$author = preg_replace('/, Sir,$/', '', $author);
-    	$reference->authors[] = $author;
+    	// sanity check
+    	if (preg_match('/^Diagnoses/', $author))
+    	{
+    		$reference->title = $author;    	
+    	}
+    	else
+    	{
+    		// Ignore numbers
+			if (!is_numeric($author))
+			{
+		
+				// clean extraneous metadata
+				$author = preg_replace('/(\s+\([A-Z]\w+\))?\s+\d+-\d+$/', '', $author);
+				$author = preg_replace('/, Sir,$/', '', $author);
+				$reference->authors[] = $author;
+			}
+		}
     }
     
+    // keywords
+    // 691
+    foreach ($xpath->query ('marcentry[@tag="691"]', $node) as $n)
+    {
+    	$keyword = trim($n->firstChild->nodeValue);
+     	$reference->keywords[] = $keyword;
+    }   
+    foreach ($xpath->query ('marcentry[@tag="651"]', $node) as $n)
+    {
+    	$keyword = trim($n->firstChild->nodeValue);
+     	$reference->keywords[] = $keyword;
+    }         
+    
+    
+    // Several different tags may have this info
     
     // In: Notes from the Royal Botanic Garden Edinburgh ;--1948 ;--v.20(n.98) 93-105
     // In: Notes from the Royal Botanic Garden Edinburgh ;--1979 ;--v.37 (2) 355-368
@@ -152,7 +223,6 @@ foreach($nodeCollection as $node)
     // In: Notes from the Royal Botanic Garden Edinburgh ; 1931 ; v.16 (n.79) 222
     
     $pattern = '/(?<journal>Notes from the Royal Botanic Garden Edinburgh)[\s|;|-]+(?<year>[0-9]{4}(-[0-9]{4})?)[\s|;|-]+[v|V].\s*(?<volume>\d+)(\s*\((?<issue>.*)\))?\s+(?<spage>\d+)(-(?<epage>\d+))?/';
-        
     
     foreach ($xpath->query ('marcentry', $node) as $n)
     {
