@@ -136,7 +136,12 @@ foreach($nodeCollection as $node)
     
     foreach ($xpath->query ('marcentry[@tag="245"]', $node) as $n)
     {
-    	$reference->authors[] = trim($n->firstChild->nodeValue);
+    	$author = trim($n->firstChild->nodeValue);
+    	
+    	// clean extraneous metadata
+    	$author = preg_replace('/(\s+\([A-Z]\w+\))?\s+\d+-\d+$/', '', $author);
+    	$author = preg_replace('/, Sir,$/', '', $author);
+    	$reference->authors[] = $author;
     }
     
     
