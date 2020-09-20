@@ -10,7 +10,7 @@ function get_pdf_filename($reference)
 	$filename = $reference->pdf;
 	
 	$filename = str_replace('file://', '', $filename);
-	$filename = preg_replace('/[#|\?]page=\d+$/', '', $filename);
+	$filename = preg_replace('/[#|\?]page=-?\d+$/', '', $filename);
 	
 	return $filename;
 }
@@ -21,7 +21,7 @@ function get_pdf_offset($reference)
 {
 	$offset = 0;
 	
-	if (preg_match('/[#|\?]page=(?<offset>\d+)$/', $reference->pdf, $m))
+	if (preg_match('/[#|\?]page=(?<offset>-?\d+)$/', $reference->pdf, $m))
 	{
 		$offset = $m['offset'];
 	}
