@@ -65,11 +65,30 @@ function import($reference)
 		&& isset($reference->issn)
 		)
 	{
+		// put each volume in a folder
+		
+		$dir = "output";
+		if (!file_exists($dir))
+		{
+			$oldumask = umask(0); 
+			mkdir($dir, 0777);
+			umask($oldumask);
+		}	
+		
+		$dir .= "/" . $reference->volume;
+		if (!file_exists($dir))
+		{
+			$oldumask = umask(0); 
+			mkdir($dir, 0777);
+			umask($oldumask);
+		}					
+	
+	
 		$pdf_filename = get_pdf_filename($reference);
 		
 		$article_pdf_filename = article_pdf_name($reference);
 		
-		$article_pdf_filename = 'output/' . $article_pdf_filename;
+		$article_pdf_filename = $dir . "/" . $article_pdf_filename;
 		
 		if (file_exists($article_pdf_filename) && !$force)
 		{
